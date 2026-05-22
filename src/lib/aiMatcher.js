@@ -22,7 +22,7 @@ Resume:
 ${cleanResume}
 """
 
-Return ONLY this JSON, no extra text, no markdown:
+Return ONLY this JSON, no extra text, no markdown, no explanation:
 {
   "candidate_name": "",
   "applied_role": "",
@@ -40,19 +40,22 @@ Return ONLY this JSON, no extra text, no markdown:
 }`;
 
   try {
-    const apiKey = process.env.GROQ_API_KEY;
-    console.log("GROQ API KEY EXISTS:", !!apiKey);
+    const apiKey = process.env.CEREBRAS_API_KEY;
+
+    if (!apiKey) {
+      throw new Error("CEREBRAS_API_KEY missing");
+    }
 
     const response = await fetch(
-      "https://api.groq.com/openai/v1/chat/completions",
+      "https://api.cerebras.ai/v1/chat/completions",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey}`,
+          Authorization: `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          model: "llama-3.3-70b-versatile",
+          model: "llama3.1-8b",
           messages: [
             {
               role: "user",
@@ -60,27 +63,56 @@ Return ONLY this JSON, no extra text, no markdown:
             },
           ],
           temperature: 0.2,
-          max_tokens: 1500,
+          max_tokens: 1000,
         }),
       }
     );
 
     const data = await response.json();
-    console.log("GROQ STATUS:", response.status);
-    console.log("GROQ DATA:", JSON.stringify(data, null, 2));
 
-    const rawText = data?.choices?.[0]?.message?.content || "";
+    console.log("STATUS:", response.status);
+    console.log(data);
 
-    if (!rawText) {
-      throw new Error("Groq se koi response nahi aaya");
+    if (!response.ok) {
+      throw new Error(
+        data?.message ||
+        data?.error ||
+        "Cerebras API failed"
+      );
     }
 
-    const cleaned = rawText.replace(/```json|```/g, "").trim();
-    const result = JSON.parse(cleaned);
+    const rawText =
+      data?.choices?.[0]?.message?.content;
 
-    return { success: true, result };
+    if (!rawText) {
+      throw new Error("Empty AI response");
+    }
+
+    let result;
+
+    try {
+      const cleaned = rawText
+        .replace(/```json/g, "")
+        .replace(/```/g, "")
+        .trim();
+
+      result = JSON.parse(cleaned);
+
+    } catch {
+      throw new Error("Invalid JSON from AI");
+    }
+
+    return {
+      success: true,
+      result,
+    };
+
   } catch (error) {
-    console.error("AI Matcher Error:", error.message);
-    return { success: false, error: error.message };
+    console.error("AI Error:", error);
+
+    return {
+      success: false,
+      error: error.message,
+    };
   }
 }
