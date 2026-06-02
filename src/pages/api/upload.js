@@ -3,12 +3,13 @@
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
+import os from 'os';
 import supabase from '../../lib/supabase';
 import { matchResumeWithJD } from '../../lib/aiMatcher';
-import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
+import { extractPdfText } from '../../lib/pdfTextExtractor';
 
 // Temp upload directory
-const uploadDir = path.join(process.cwd(), 'tmp', 'uploads');
+const uploadDir = path.join(os.tmpdir(), 'tectmatch-uploads');
 
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
@@ -108,22 +109,11 @@ export default async function handler(req, res) {
       try {
         // PDF text extract karo
         const dataBuffer = fs.readFileSync(file.path);
-        const uint8Array = new Uint8Array(dataBuffer);
-const loadingTask = pdfjsLib.getDocument({ data: uint8Array });
-const pdf = await loadingTask.promise;
+        const extractedText = await extractPdfText(dataBuffer);
 
-let extractedText = '';
-for (let i = 1; i <= pdf.numPages; i++) {
-  const page = await pdf.getPage(i);
-  const content = await page.getTextContent();
-  const pageText = content.items.map(item => item.str).join(' ');
-  extractedText += pageText + '\n';
-}
-extractedText = extractedText.trim().slice(0, 5000);
-
-if (!extractedText) {
-  throw new Error("PDF se text extract nahi hua");
-}
+        if (!extractedText) {
+          throw new Error('PDF se text extract nahi hua');
+        }
 
         // JD nahi hai toh error
         if (!jdText) {
