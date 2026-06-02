@@ -109,7 +109,7 @@ export default function Login() {
 
                 {/* Footer Links */}
                 <div className="mt-8 text-center text-sm font-medium text-gray-600">
-                    Don't have an account?{" "}
+                    Don&apos;t have an account?{" "}
                     <Link href="/auth/signup" className="text-indigo-600 hover:text-indigo-700 hover:underline transition-all">
                         Create an account
                     </Link>

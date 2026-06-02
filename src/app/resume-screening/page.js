@@ -1,8 +1,8 @@
 "use client";
 import Sidebar from "../../components/Sidebar";
-import { useState, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import supabase from "../../lib/supabase";
-import { FaCloudUploadAlt, FaFilePdf, FaTrash, FaCheckCircle, FaRobot } from "react-icons/fa";
+import { FaCloudUploadAlt, FaFilePdf, FaTrash, FaCheckCircle, FaUserTie } from "react-icons/fa";
 import ResultCard from "../../components/ResultCard";
 
 export default function ResumeScreening() {
@@ -72,9 +72,9 @@ export default function ResumeScreening() {
         });
     };
 
-    const removeFile = (indexToRemove) => {
-        setFiles(files.filter((_, index) => index !== indexToRemove));
-    };
+    const removeFile = useCallback((indexToRemove) => {
+        setFiles(prevFiles => prevFiles.filter((_, index) => index !== indexToRemove));
+    }, []);
 
     const handleStartScreening = async () => {
         if (!selectedJob) {
@@ -85,16 +85,7 @@ export default function ResumeScreening() {
             alert("Please upload at least one resume.");
             return;
         }
-        // Fetch job details from Supabase
         setIsScreening(true);
-        let jobDetails = null;
-        try {
-            const { data, error } = await supabase.from('tectmatch_jobs').select('*').eq('id', selectedJob).single();
-            if (error) throw error;
-            jobDetails = data;
-        } catch (err) {
-            console.warn('Could not fetch job details from Supabase, continuing without JD specifics.', err);
-        }
 
         // Prepare and send FormData to /api/upload
         const formData = new FormData();
@@ -228,7 +219,7 @@ export default function ResumeScreening() {
                                         </div>
                                     ) : (
                                         files.map((file, index) => (
-                                            <div key={index} className="flex items-center justify-between p-3.5 border border-gray-100 rounded-xl bg-gray-50/50 hover:bg-white hover:border-gray-200 hover:shadow-sm transition-all group">
+                                            <div key={`${file.name}-${file.size}-${file.lastModified}`} className="flex items-center justify-between p-3.5 border border-gray-100 rounded-xl bg-gray-50/50 hover:bg-white hover:border-gray-200 hover:shadow-sm transition-all group">
                                                 <div className="flex items-center gap-3 overflow-hidden">
                                                     <div className="w-10 h-10 bg-red-50 text-red-500 rounded-lg flex items-center justify-center flex-shrink-0">
                                                         <FaFilePdf className="text-lg" />
@@ -271,17 +262,17 @@ export default function ResumeScreening() {
                         </div>
                     </div>
 
-                    {/* AI Result Section */}
+                    {/* Results Section */}
                     {showResults && (
                         <div className="mt-8 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8 animate-in fade-in slide-in-from-bottom-4 transition-all mb-8">
                             <div className="flex items-center gap-3 mb-6">
-                                <div className="w-10 h-10 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                                    <FaRobot className="text-xl" />
-                                </div>
-                                <div>
-                                    <h2 className="text-xl font-bold text-gray-900">AI Screening Results</h2>
-                                    <p className="text-sm text-gray-500">Analysis complete. Here is the preliminary ranking.</p>
-                                </div>
+                                    <div className="w-10 h-10 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                                        <FaUserTie className="text-xl" />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-xl font-bold text-gray-900">Candidate Workspace</h2>
+                                        <p className="text-sm text-gray-500">Analysis complete. Review candidate matches and take action.</p>
+                                    </div>
                             </div>
 
                             <div className="space-y-4">
@@ -295,7 +286,7 @@ export default function ResumeScreening() {
                                     </div>
                                 ) : (
                                     results.map((r, idx) => (
-                                        <ResultCard key={idx} result={r} rank={idx + 1} totalResults={results.length} />
+                                        <ResultCard key={r.originalFileName || r.candidateName || idx} result={r} rank={idx + 1} totalResults={results.length} />
                                     ))
                                 )}
                             </div>

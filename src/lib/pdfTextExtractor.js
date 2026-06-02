@@ -1,4 +1,4 @@
-const MAX_EXTRACTED_TEXT_LENGTH = 100_000;
+const MAX_EXTRACTED_TEXT_LENGTH = 12_000;
 
 let pdfJsNodeGlobalsReady;
 
@@ -58,6 +58,7 @@ export async function extractPdfText(buffer) {
 
   const pdf = await loadingTask.promise;
   const pages = [];
+  let extractedLength = 0;
 
   try {
     for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
@@ -72,9 +73,14 @@ export async function extractPdfText(buffer) {
 
       if (pageText) {
         pages.push(pageText);
+        extractedLength += pageText.length + 1;
       }
 
       page.cleanup();
+
+      if (extractedLength >= MAX_EXTRACTED_TEXT_LENGTH) {
+        break;
+      }
     }
   } finally {
     await pdf.destroy();

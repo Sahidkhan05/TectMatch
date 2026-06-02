@@ -44,7 +44,7 @@ export default function Home() {
                 Dashboard Overview
               </h1>
               <p className="text-gray-500 mt-2 text-sm md:text-base">
-                Welcome back! Here's what's happening with your recruitment today.
+                Welcome back! Here&apos;s what&apos;s happening with your recruitment today.
               </p>
             </div>
 

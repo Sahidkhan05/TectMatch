@@ -1,6 +1,6 @@
 "use client";
 import Sidebar from "../../components/Sidebar";
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import supabase from "../../lib/supabase";
 import { FiPlus, FiEdit2, FiTrash2, FiBriefcase, FiClock, FiCalendar, FiX } from "react-icons/fi";
 
@@ -16,11 +16,7 @@ export default function JobsPage() {
         description: ''
     });
 
-    useEffect(() => {
-        fetchJobs();
-    }, []);
-
-    const fetchJobs = async () => {
+    const fetchJobs = useCallback(async () => {
         try {
             setLoading(true);
             const { data, error } = await supabase.from('tectmatch_jobs').select('*').order('created_at', { ascending: false });
@@ -51,10 +47,15 @@ export default function JobsPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
+
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        fetchJobs();
+    }, [fetchJobs]);
 
     const handleInputChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        setFormData(prevFormData => ({ ...prevFormData, [e.target.name]: e.target.value }));
     };
 
     const handleSubmit = async (e) => {
@@ -65,7 +66,7 @@ export default function JobsPage() {
             if (error) throw error;
             
             if (data) {
-                setJobs([data[0], ...jobs]);
+                setJobs(prevJobs => [data[0], ...prevJobs]);
             }
             
             setShowForm(false);
@@ -74,7 +75,7 @@ export default function JobsPage() {
             console.error("Error creating job:", error);
             // Fallback UI update if DB is unavailable
             const newJob = { ...formData, id: Date.now().toString(), created_at: new Date().toISOString() };
-            setJobs([newJob, ...jobs]);
+            setJobs(prevJobs => [newJob, ...prevJobs]);
             setShowForm(false);
             setFormData({ title: '', company: '', skills: '', experience: '', description: '' });
             alert("Note: Job added locally for testing. Supabase connection failed. Please configure your .env.local file with Supabase credentials and create a 'jobs' table.");
@@ -85,11 +86,11 @@ export default function JobsPage() {
         try {
             const { error } = await supabase.from('tectmatch_jobs').delete().eq('id', id);
             if (error) throw error;
-            setJobs(jobs.filter(job => job.id !== id));
+            setJobs(prevJobs => prevJobs.filter(job => job.id !== id));
         } catch (error) {
             console.error("Error deleting job:", error);
             // Fallback for local UI updates
-            setJobs(jobs.filter(job => job.id !== id));
+            setJobs(prevJobs => prevJobs.filter(job => job.id !== id));
         }
     };
 
@@ -200,7 +201,7 @@ export default function JobsPage() {
                             <div className="text-center py-16 bg-white rounded-2xl border border-gray-100 shadow-sm transition-all">
                                 <FiBriefcase className="mx-auto text-4xl text-gray-300 mb-3" />
                                 <h3 className="text-lg font-medium text-gray-900">No jobs posted yet</h3>
-                                <p className="text-gray-500 mt-1">Click "Create New Job" to add your first job description.</p>
+                                <p className="text-gray-500 mt-1">Click &quot;Create New Job&quot; to add your first job description.</p>
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
