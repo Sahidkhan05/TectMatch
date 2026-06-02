@@ -65,8 +65,8 @@ export async function extractPdfText(buffer) {
 
   const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs');
 
+  pdfjsLib.GlobalWorkerOptions.workerSrc = '';
   
-
   const loadingTask = pdfjsLib.getDocument({
   data: new Uint8Array(buffer),
   disableWorker: true,
