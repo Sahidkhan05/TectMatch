@@ -1,4 +1,9 @@
+import { createRequire } from 'module';
+import { pathToFileURL } from 'url';
+
 const MAX_EXTRACTED_TEXT_LENGTH = 5000;
+
+const require = createRequire(import.meta.url);
 
 class FallbackDOMMatrix {
   constructor(init) {
@@ -59,12 +64,19 @@ export async function extractPdfText(buffer) {
   await ensurePdfJsNodeGlobals();
 
   const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs');
+
+  pdfjsLib.GlobalWorkerOptions.workerSrc = pathToFileURL(
+    require.resolve('pdfjs-dist/legacy/build/pdf.worker.mjs')
+  ).href;
+
   const loadingTask = pdfjsLib.getDocument({
     data: new Uint8Array(buffer),
     disableFontFace: true,
-    disableWorker: true,
     isEvalSupported: false,
+    isImageDecoderSupported: false,
+    isOffscreenCanvasSupported: false,
     useSystemFonts: true,
+    useWorkerFetch: false,
   });
 
   const pdf = await loadingTask.promise;
