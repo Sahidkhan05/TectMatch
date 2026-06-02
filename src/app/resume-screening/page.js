@@ -117,183 +117,181 @@ export default function ResumeScreening() {
 
     return (
         <div className="flex flex-col md:flex-row min-h-screen bg-gray-50 font-sans">
-            <div className="hidden md:block">
-                <Sidebar />
-            </div>
+            {/* Sidebar */}
+            <Sidebar />
 
-            <div className="flex-1 flex flex-col h-screen overflow-y-auto">
-                <div className="p-4 md:p-8">
-                    
-                    {/* Page Header */}
-                    <div className="mt-4 md:mt-8 mb-6">
-                        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">
-                            Resume Screening
-                        </h1>
-                        <p className="text-gray-500 mt-2 text-sm md:text-base">
-                            Upload and analyze candidate resumes
-                        </p>
-                    </div>
+            {/* Main Content */}
+            <div className="flex-1 flex flex-col w-full overflow-x-hidden">
+                <main className="flex-1 overflow-y-auto">
+                    <div className="page-padding">
+                        {/* Page Header */}
+                        <div className="mt-4 sm:mt-6 md:mt-8 mb-6 sm:mb-8">
+                            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">
+                                Resume Screening
+                            </h1>
+                            <p className="text-gray-500 mt-2 text-sm sm:text-base md:text-lg leading-relaxed">
+                                Upload and analyze candidate resumes
+                            </p>
+                        </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        {/* Left Column (Forms and Upload) */}
-                        <div className="lg:col-span-2 space-y-6">
-                            
-                            {/* Job Selection */}
-                            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 transition-all hover:shadow-md">
-                                <h2 className="font-semibold text-lg text-gray-800 mb-4">
-                                    Job Position
-                                </h2>
-                                <select 
-                                    value={selectedJob}
-                                    onChange={(e) => setSelectedJob(e.target.value)}
-                                    className="w-full bg-white text-black placeholder-gray-400 border border-gray-200 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all cursor-pointer"
-                                >
-                                    <option value="" disabled>Select Job Position...</option>
-                                    {jobs.map(job => (
-                                        <option key={job.id} value={job.id}>{job.title}</option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            {/* Resume Upload */}
-                            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 transition-all hover:shadow-md">
-                                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
-                                    <h2 className="font-semibold text-lg text-gray-800">
-                                        Upload Resumes
+                        <div className="grid grid-cols-1 lg:grid-cols-3 card-spacing">
+                            {/* Left Column (Forms and Upload) */}
+                            <div className="lg:col-span-2 space-y-4 sm:space-y-6">
+                                {/* Job Selection */}
+                                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 md:p-6 transition-all hover:shadow-md">
+                                    <h2 className="font-semibold text-base sm:text-lg md:text-xl text-gray-800 mb-4">
+                                        Job Position
                                     </h2>
-                                    <span className="text-xs font-semibold bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full">
-                                        Max upload: 5 PDF files
-                                    </span>
+                                    <select 
+                                        value={selectedJob}
+                                        onChange={(e) => setSelectedJob(e.target.value)}
+                                        className="w-full bg-white text-black placeholder-gray-400 border border-gray-200 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all cursor-pointer text-sm sm:text-base touch-target"
+                                    >
+                                        <option value="" disabled>Select Job Position...</option>
+                                        {jobs.map(job => (
+                                            <option key={job.id} value={job.id}>{job.title}</option>
+                                        ))}
+                                    </select>
                                 </div>
 
-                                <div 
-                                    onDrop={handleDrop}
-                                    onDragOver={handleDragOver}
-                                    onClick={() => fileInputRef.current?.click()}
-                                    className="border-2 border-dashed border-gray-300 bg-gray-50 hover:bg-gray-100 hover:border-gray-400 p-8 md:p-12 rounded-xl text-center transition-all group cursor-pointer flex flex-col items-center justify-center"
-                                >
-                                    <input 
-                                        type="file" 
-                                        ref={fileInputRef} 
-                                        onChange={handleFileChange} 
-                                        className="hidden" 
-                                        multiple 
-                                        accept="application/pdf"
-                                    />
-                                    <div className="flex justify-center mb-5">
-                                        <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm group-hover:scale-110 group-hover:shadow transition-all duration-300">
-                                            <FaCloudUploadAlt className="text-3xl text-gray-400 group-hover:text-black transition-colors" />
-                                        </div>
+                                {/* Resume Upload */}
+                                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 md:p-6 transition-all hover:shadow-md">
+                                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
+                                        <h2 className="font-semibold text-base sm:text-lg md:text-xl text-gray-800">
+                                            Upload Resumes
+                                        </h2>
+                                        <span className="text-xs font-semibold bg-gray-100 text-gray-600 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full whitespace-nowrap">
+                                            Max: 5 files
+                                        </span>
                                     </div>
-                                    <p className="text-gray-800 font-medium mb-1 text-lg">
-                                        Drag & drop resumes here
-                                    </p>
-                                    <p className="text-sm text-gray-400 mb-8 max-w-xs mx-auto">
-                                        Supported format: PDF up to 5MB each.
-                                    </p>
-                                    <button className="bg-black text-white px-6 py-2.5 rounded-xl font-medium hover:bg-gray-800 transition-colors shadow-sm focus:ring-4 focus:ring-gray-200">
-                                        Choose Files
-                                    </button>
+
+                                    <div 
+                                        onDrop={handleDrop}
+                                        onDragOver={handleDragOver}
+                                        onClick={() => fileInputRef.current?.click()}
+                                        className="border-2 border-dashed border-gray-300 bg-gray-50 hover:bg-gray-100 hover:border-gray-400 p-6 sm:p-8 md:p-12 rounded-xl text-center transition-all group cursor-pointer flex flex-col items-center justify-center"
+                                    >
+                                        <input 
+                                            type="file" 
+                                            ref={fileInputRef} 
+                                            onChange={handleFileChange} 
+                                            className="hidden" 
+                                            multiple 
+                                            accept="application/pdf"
+                                        />
+                                        <div className="flex justify-center mb-4 sm:mb-5">
+                                            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-white rounded-full flex items-center justify-center shadow-sm group-hover:scale-110 group-hover:shadow transition-all duration-300">
+                                                <FaCloudUploadAlt className="text-2xl sm:text-3xl text-gray-400 group-hover:text-black transition-colors" />
+                                            </div>
+                                        </div>
+                                        <p className="text-gray-800 font-medium mb-1 text-base sm:text-lg">
+                                            Drag & drop resumes
+                                        </p>
+                                        <p className="text-xs sm:text-sm text-gray-400 mb-6 sm:mb-8 max-w-xs mx-auto">
+                                            Supported format: PDF up to 5MB each.
+                                        </p>
+                                        <button className="bg-black text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl font-medium hover:bg-gray-800 transition-colors shadow-sm focus:ring-4 focus:ring-gray-200 text-sm sm:text-base touch-target">
+                                            Choose Files
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Right Column (Files and Actions) */}
+                            <div className="space-y-4 sm:space-y-6">
+                                {/* Uploaded files */}
+                                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 md:p-6 transition-all hover:shadow-md flex flex-col">
+                                    <div className="flex justify-between items-center gap-2 mb-4 sm:mb-5">
+                                        <h2 className="font-semibold text-base sm:text-lg text-gray-800">
+                                            Files
+                                        </h2>
+                                        <span className={`text-xs font-medium px-2 py-1 rounded-md transition-colors flex-shrink-0 ${files.length === 5 ? 'bg-red-50 text-red-600' : 'bg-gray-50 text-gray-500'}`}>
+                                            {files.length}/5
+                                        </span>
+                                    </div>
+
+                                    <div className="space-y-2 sm:space-y-3 flex-1 min-h-[100px]">
+                                        {files.length === 0 ? (
+                                            <div className="flex flex-col items-center justify-center h-full text-gray-400 py-6">
+                                                <p className="text-xs sm:text-sm text-center">No files uploaded yet.</p>
+                                            </div>
+                                        ) : (
+                                            files.map((file, index) => (
+                                                <div key={`${file.name}-${file.size}-${file.lastModified}`} className="flex items-center justify-between p-2 sm:p-3 border border-gray-100 rounded-lg sm:rounded-xl bg-gray-50/50 hover:bg-white hover:border-gray-200 hover:shadow-sm transition-all group">
+                                                    <div className="flex items-center gap-2 sm:gap-3 overflow-hidden min-w-0">
+                                                        <div className="w-9 h-9 sm:w-10 sm:h-10 bg-red-50 text-red-500 rounded-lg flex items-center justify-center flex-shrink-0 text-sm sm:text-base">
+                                                            <FaFilePdf />
+                                                        </div>
+                                                        <div className="truncate min-w-0">
+                                                            <p className="text-xs sm:text-sm font-medium text-gray-800 truncate">{file.name}</p>
+                                                            <p className="text-xs text-gray-400 mt-0.5">
+                                                                {(file.size / (1024 * 1024)).toFixed(2)} MB
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <button 
+                                                        onClick={(e) => { e.stopPropagation(); removeFile(index); }}
+                                                        className="text-gray-400 hover:text-red-500 p-1.5 sm:p-2 transition-colors focus:outline-none flex-shrink-0" 
+                                                        aria-label="Remove file"
+                                                    >
+                                                        <FaTrash className="text-sm" />
+                                                    </button>
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+
+                                    {/* Action Button */}
+                                    <div className="mt-4 sm:mt-6 md:mt-8 pt-4 sm:pt-6 border-t border-gray-100">
+                                        <button 
+                                            onClick={handleStartScreening}
+                                            disabled={isScreening || files.length === 0 || !selectedJob}
+                                            className={`w-full px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-medium transition-all flex items-center justify-center gap-2 focus:ring-4 focus:ring-gray-200 text-sm sm:text-base touch-target ${
+                                                (isScreening || files.length === 0 || !selectedJob) 
+                                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed shadow-none border border-gray-200' 
+                                                    : 'bg-black text-white hover:bg-gray-800 hover:shadow-lg shadow-md'
+                                            }`}
+                                        >
+                                            <FaCheckCircle className="text-sm flex-shrink-0" />
+                                            <span>{isScreening ? 'Processing...' : 'Start Screening'}</span>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Right Column (Files and Actions) */}
-                        <div className="space-y-6">
-                            
-                            {/* Uploaded files */}
-                            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 transition-all hover:shadow-md h-full flex flex-col">
-                                <div className="flex justify-between items-center mb-5">
-                                    <h2 className="font-semibold text-lg text-gray-800">
-                                        Uploaded Files
-                                    </h2>
-                                    <span className={`text-sm font-medium px-2 py-1 rounded-md transition-colors ${files.length === 5 ? 'bg-red-50 text-red-600' : 'bg-gray-50 text-gray-500'}`}>
-                                        {files.length}/5
-                                    </span>
+                        {/* Results Section */}
+                        {showResults && (
+                            <div className="mt-6 sm:mt-8 md:mt-10 bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 md:p-6 md:p-8 animate-in-smooth mb-6 sm:mb-8">
+                                <div className="flex items-center gap-2 sm:gap-3 mb-6">
+                                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0 text-sm sm:text-base">
+                                        <FaUserTie className="text-lg sm:text-xl" />
+                                    </div>
+                                    <div className="min-w-0">
+                                        <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">Candidate Workspace</h2>
+                                        <p className="text-xs sm:text-sm text-gray-500 mt-0.5">Analysis complete. Review candidate matches and take action.</p>
+                                    </div>
                                 </div>
 
-                                <div className="space-y-3 flex-1">
-                                    {files.length === 0 ? (
-                                        <div className="flex flex-col items-center justify-center h-full min-h-[150px] text-gray-400">
-                                            <p className="text-sm text-center">No files uploaded yet.</p>
+                                <div className="space-y-4 sm:space-y-6">
+                                    {results.length === 0 ? (
+                                        <div className="bg-gray-50 border border-dashed border-gray-200 rounded-xl min-h-[200px] flex flex-col items-center justify-center text-center p-4 sm:p-6">
+                                            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-white rounded-full flex items-center justify-center shadow-sm mb-3 sm:mb-4">
+                                                <FaRobot className="text-2xl sm:text-3xl text-gray-300" />
+                                            </div>
+                                            <h3 className="text-base sm:text-lg font-medium text-gray-800">No results returned</h3>
+                                            <p className="text-xs sm:text-sm text-gray-500 max-w-sm mt-2">Try uploading files again or check server logs.</p>
                                         </div>
                                     ) : (
-                                        files.map((file, index) => (
-                                            <div key={`${file.name}-${file.size}-${file.lastModified}`} className="flex items-center justify-between p-3.5 border border-gray-100 rounded-xl bg-gray-50/50 hover:bg-white hover:border-gray-200 hover:shadow-sm transition-all group">
-                                                <div className="flex items-center gap-3 overflow-hidden">
-                                                    <div className="w-10 h-10 bg-red-50 text-red-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                                                        <FaFilePdf className="text-lg" />
-                                                    </div>
-                                                    <div className="truncate">
-                                                        <p className="text-sm font-medium text-gray-800 truncate">{file.name}</p>
-                                                        <p className="text-xs text-gray-400 mt-0.5">
-                                                            {(file.size / (1024 * 1024)).toFixed(2)} MB • Ready
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                                <button 
-                                                    onClick={(e) => { e.stopPropagation(); removeFile(index); }}
-                                                    className="text-gray-400 hover:text-red-500 p-2 transition-colors focus:outline-none" 
-                                                    aria-label="Remove file"
-                                                >
-                                                    <FaTrash />
-                                                </button>
-                                            </div>
+                                        results.map((r, idx) => (
+                                            <ResultCard key={r.originalFileName || r.candidateName || idx} result={r} rank={idx + 1} totalResults={results.length} />
                                         ))
                                     )}
                                 </div>
-
-                                {/* Action Button */}
-                                <div className="mt-8 pt-6 border-t border-gray-100">
-                                    <button 
-                                        onClick={handleStartScreening}
-                                        disabled={isScreening || files.length === 0 || !selectedJob}
-                                        className={`w-full px-6 py-3.5 rounded-xl font-medium transition-all flex items-center justify-center gap-2 focus:ring-4 focus:ring-gray-200 ${
-                                            (isScreening || files.length === 0 || !selectedJob) 
-                                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed shadow-none border border-gray-200' 
-                                                : 'bg-black text-white hover:bg-gray-800 hover:shadow-lg shadow-md'
-                                        }`}
-                                    >
-                                        <FaCheckCircle className="text-sm" />
-                                        {isScreening ? 'Processing...' : 'Start Screening'}
-                                    </button>
-                                </div>
                             </div>
-                        </div>
+                        )}
                     </div>
-
-                    {/* Results Section */}
-                    {showResults && (
-                        <div className="mt-8 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8 animate-in fade-in slide-in-from-bottom-4 transition-all mb-8">
-                            <div className="flex items-center gap-3 mb-6">
-                                    <div className="w-10 h-10 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                                        <FaUserTie className="text-xl" />
-                                    </div>
-                                    <div>
-                                        <h2 className="text-xl font-bold text-gray-900">Candidate Workspace</h2>
-                                        <p className="text-sm text-gray-500">Analysis complete. Review candidate matches and take action.</p>
-                                    </div>
-                            </div>
-
-                            <div className="space-y-4">
-                                {results.length === 0 ? (
-                                    <div className="bg-gray-50 border border-dashed border-gray-200 rounded-xl min-h-[200px] flex flex-col items-center justify-center text-center p-6">
-                                        <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm mb-4">
-                                            <FaRobot className="text-3xl text-gray-300" />
-                                        </div>
-                                        <h3 className="text-lg font-medium text-gray-800">No results returned</h3>
-                                        <p className="text-sm text-gray-500 max-w-sm mt-2">Try uploading files again or check server logs.</p>
-                                    </div>
-                                ) : (
-                                    results.map((r, idx) => (
-                                        <ResultCard key={r.originalFileName || r.candidateName || idx} result={r} rank={idx + 1} totalResults={results.length} />
-                                    ))
-                                )}
-                            </div>
-                        </div>
-                    )}
-
-                </div>
+                </main>
             </div>
         </div>
     );

@@ -429,24 +429,24 @@ function ResultCard({ result, onSave, rank = 1, totalResults = 1 }) {
 
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg">
-      <section className="bg-white px-5 py-5 sm:px-6">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div className="min-w-0">
+      <section className="bg-white px-4 sm:px-5 md:px-6 py-5 sm:py-6">
+        <div className="flex flex-col gap-4 lg:gap-6 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex-1 min-w-0">
             <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">
               <FaUserTie />
               Candidate Workspace
             </div>
-            <div className="flex items-center gap-3">
-              <h3 className="truncate text-xl font-extrabold tracking-tight text-gray-950 sm:text-2xl">{candidateName}</h3>
+            <h3 className="truncate text-lg sm:text-xl md:text-2xl font-extrabold tracking-tight text-gray-950">{candidateName}</h3>
+            
+            <div className="mt-2 sm:mt-3 flex flex-wrap gap-2">
               <SmallBadge>{fileName}</SmallBadge>
               <SmallBadge>Rank #{rank} of {totalResults}</SmallBadge>
-            </div>
-            <div className="mt-3">
               <SmallBadge>Reference: {scoreValue}%</SmallBadge>
             </div>
 
-            <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 items-start">
-              <div className="bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
+            {/* Charts - Stack on mobile, side-by-side on larger screens */}
+            <div className="mt-4 sm:mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+              <div className="bg-gradient-to-br from-white to-gray-50 p-3 sm:p-4 rounded-xl border border-gray-100 shadow-sm overflow-x-auto">
                 <DonutChart
                   covered={skillCoverage.coveredSkills.length}
                   partial={skillCoverage.partialSkills.length}
@@ -454,29 +454,32 @@ function ResultCard({ result, onSave, rank = 1, totalResults = 1 }) {
                   total={skillCoverage.requiredSkills.length}
                 />
               </div>
-              <div>
+              <div className="flex flex-col gap-3">
                 <ProjectSummary validations={projectValidation} />
               </div>
             </div>
           </div>
 
-          <label className="flex w-full flex-col gap-2 sm:w-64">
-            <span className="text-xs font-bold uppercase tracking-[0.14em] text-gray-400">Candidate Status</span>
-            <select
-              value={candidateStatus}
-              onChange={(event) => setCandidateStatus(event.target.value)}
-              className="rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm font-bold text-gray-800 shadow-sm focus:border-gray-400 focus:outline-none"
-            >
-              {CANDIDATE_STATUSES.map((status) => (
-                <option key={status} value={status}>{status}</option>
-              ))}
-            </select>
-          </label>
+          {/* Status Dropdown - Full width on mobile, fixed width on desktop */}
+          <div className="w-full sm:w-auto lg:w-64">
+            <label className="flex flex-col gap-2">
+              <span className="text-xs font-bold uppercase tracking-[0.14em] text-gray-400">Candidate Status</span>
+              <select
+                value={candidateStatus}
+                onChange={(event) => setCandidateStatus(event.target.value)}
+                className="rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm font-bold text-gray-800 shadow-sm focus:border-gray-400 focus:outline-none touch-target w-full"
+              >
+                {CANDIDATE_STATUSES.map((status) => (
+                  <option key={status} value={status}>{status}</option>
+                ))}
+              </select>
+            </label>
+          </div>
         </div>
       </section>
 
       <WorkspaceSection title="Skill Coverage" icon={FaCheck}>
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 sm:gap-5">
           <div>
             <div className="mb-2 text-xs font-bold uppercase tracking-[0.14em] text-gray-400">Required Skills</div>
             <div className="flex flex-wrap gap-2">
@@ -501,7 +504,7 @@ function ResultCard({ result, onSave, rank = 1, totalResults = 1 }) {
               {skillCoverage.partialSkills.length > 0 ? skillCoverage.partialSkills.map((skill) => <SkillBadge key={skill} tone="amber">{skill}</SkillBadge>) : <EmptyState>No partial skills detected.</EmptyState>}
             </div>
           </div>
-          <div className="lg:col-span-2">
+          <div className="sm:col-span-2">
             <div className="mb-2 text-xs font-bold uppercase tracking-[0.14em] text-gray-400">Missing Skills</div>
             <div className="flex flex-wrap gap-2">
               {skillCoverage.missingSkills.length > 0 ? skillCoverage.missingSkills.map((skill) => <SkillBadge key={skill} tone="rose">{skill}</SkillBadge>) : <EmptyState>No missing skills detected.</EmptyState>}
@@ -511,21 +514,46 @@ function ResultCard({ result, onSave, rank = 1, totalResults = 1 }) {
       </WorkspaceSection>
 
       <WorkspaceSection title="Project Validation" icon={FaSearch}>
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[720px] text-left text-sm">
+        {/* Mobile Card View */}
+        <div className="md:hidden space-y-3 sm:space-y-4">
+          {projectValidation.length > 0 ? projectValidation.map((item, index) => (
+            <div key={`${item.jdRequirement}-${index}`} className="border border-gray-100 rounded-xl p-3 sm:p-4 space-y-2 bg-gray-50/50">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.14em] text-gray-400 mb-1">Requirement</p>
+                <p className="text-sm font-semibold text-gray-900">{item.jdRequirement || "Requirement not specified"}</p>
+              </div>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.14em] text-gray-400 mb-1">Evidence</p>
+                <p className="text-sm text-gray-600">{item.evidenceFound || "No evidence found"}</p>
+              </div>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.14em] text-gray-400 mb-1">Status</p>
+                <SkillBadge tone={item.validationStatus === "validated" ? "emerald" : item.validationStatus === "missing" ? "rose" : "amber"}>
+                  {item.validationStatus ? item.validationStatus.charAt(0).toUpperCase() + item.validationStatus.slice(1) : "Partial"}
+                </SkillBadge>
+              </div>
+            </div>
+          )) : (
+            <div className="text-center py-6 text-sm text-gray-400">No project evidence returned by the matcher.</div>
+          )}
+        </div>
+
+        {/* Desktop Table View */}
+        <div className="hidden md:block overflow-x-auto -mx-5 -mb-5 sm:-mx-6 md:-mx-0 md:mb-0">
+          <table className="w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-gray-100 text-xs uppercase tracking-[0.14em] text-gray-400">
-                <th className="py-3 pr-4 font-bold">Requirement</th>
-                <th className="py-3 pr-4 font-bold">Evidence</th>
-                <th className="py-3 font-bold">Status</th>
+              <tr className="border-b border-gray-100 text-xs uppercase tracking-[0.14em] text-gray-400 bg-gray-50/50">
+                <th className="py-3 px-5 sm:px-6 font-bold">Requirement</th>
+                <th className="py-3 px-5 sm:px-6 font-bold">Evidence</th>
+                <th className="py-3 px-5 sm:px-6 font-bold">Status</th>
               </tr>
             </thead>
             <tbody>
               {projectValidation.length > 0 ? projectValidation.map((item, index) => (
-                <tr key={`${item.jdRequirement}-${index}`} className="border-b border-gray-50 align-top">
-                  <td className="py-3 pr-4 font-semibold text-gray-900">{item.jdRequirement || "Requirement not specified"}</td>
-                  <td className="py-3 pr-4 text-gray-600">{item.evidenceFound || "No evidence found"}</td>
-                  <td className="py-3">
+                <tr key={`${item.jdRequirement}-${index}`} className="border-b border-gray-50 align-top hover:bg-gray-50/30 transition-colors">
+                  <td className="py-3 px-5 sm:px-6 font-semibold text-gray-900">{item.jdRequirement || "Requirement not specified"}</td>
+                  <td className="py-3 px-5 sm:px-6 text-gray-600">{item.evidenceFound || "No evidence found"}</td>
+                  <td className="py-3 px-5 sm:px-6">
                     <SkillBadge tone={item.validationStatus === "validated" ? "emerald" : item.validationStatus === "missing" ? "rose" : "amber"}>
                       {item.validationStatus ? item.validationStatus.charAt(0).toUpperCase() + item.validationStatus.slice(1) : "Partial"}
                     </SkillBadge>
@@ -545,43 +573,46 @@ function ResultCard({ result, onSave, rank = 1, totalResults = 1 }) {
         <textarea
           value={recruiterNotes}
           onChange={(event) => setRecruiterNotes(event.target.value)}
-          rows="5"
-          className="w-full resize-none rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800 shadow-sm focus:border-gray-400 focus:outline-none"
+          rows="4"
+          className="w-full resize-none rounded-xl border border-gray-200 bg-white px-3 sm:px-4 py-3 text-sm text-gray-800 shadow-sm focus:border-gray-400 focus:outline-none touch-target"
           placeholder="Add screening notes, clarification questions, interview feedback, or follow-up context..."
         />
       </WorkspaceSection>
 
-      <section className="border-t border-gray-200 bg-gray-50 px-5 py-5 sm:px-6">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+      <section className="border-t border-gray-200 bg-gray-50 px-4 sm:px-5 md:px-6 py-5 sm:py-6">
+        <div className="flex flex-col gap-4 lg:gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <div className="text-sm font-black uppercase tracking-[0.16em] text-gray-500">Decision</div>
-            <p className="mt-1 text-sm text-gray-500">Use status and notes as the recruiter-owned source of truth.</p>
+            <p className="mt-1 text-xs sm:text-sm text-gray-500">Use status and notes as the recruiter-owned source of truth.</p>
           </div>
-          <div className="flex flex-col gap-3 sm:flex-row">
+          
+          {/* Action Buttons - Stack on mobile, flex on desktop */}
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full lg:w-auto">
             <button
               onClick={handleDownload}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-bold text-gray-800 shadow-sm transition-colors hover:border-gray-300"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-bold text-gray-800 shadow-sm transition-colors hover:border-gray-300 hover:bg-gray-50 touch-target flex-1 sm:flex-none"
             >
               <FaDownload />
-              <span>Download Workspace</span>
+              <span className="hidden sm:inline">Download</span>
+              <span className="sm:hidden">Download Workspace</span>
             </button>
             <button
               onClick={() => setCandidateStatus("Rejected")}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm font-bold text-rose-700 transition-colors hover:bg-rose-100"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-rose-100 bg-rose-50 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-bold text-rose-700 transition-colors hover:bg-rose-100 touch-target flex-1 sm:flex-none"
             >
               <FaTimes />
               <span>Reject</span>
             </button>
             <button
               onClick={() => setCandidateStatus("Interview")}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm font-bold text-blue-700 transition-colors hover:bg-blue-100"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-blue-100 bg-blue-50 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-bold text-blue-700 transition-colors hover:bg-blue-100 touch-target flex-1 sm:flex-none"
             >
               <FaSearch />
               <span>Interview</span>
             </button>
             <button
               onClick={() => setCandidateStatus("Shortlisted")}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-700 transition-colors hover:bg-emerald-100"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-emerald-100 bg-emerald-50 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-bold text-emerald-700 transition-colors hover:bg-emerald-100 touch-target flex-1 sm:flex-none"
             >
               <FaCheck />
               <span>Shortlist</span>
@@ -589,7 +620,7 @@ function ResultCard({ result, onSave, rank = 1, totalResults = 1 }) {
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-gray-950 px-4 py-3 text-sm font-bold text-white shadow-sm transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-gray-950 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-bold text-white shadow-sm transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60 touch-target flex-1 sm:flex-none"
             >
               <FaSave />
               <span>{isSaving ? "Saving..." : saved ? "Save Changes" : "Save Workspace"}</span>

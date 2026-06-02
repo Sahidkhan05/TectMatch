@@ -3,8 +3,11 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-  --app-font-sans: Arial, Helvetica, sans-serif;
+  --app-font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --app-font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --animation-fast: 150ms;
+  --animation-normal: 300ms;
+  --animation-slow: 500ms;
 }
 
 @theme inline {
@@ -21,8 +24,119 @@
   }
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--app-font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Responsive Typography */
+h1, .text-3xl { @apply leading-tight tracking-tight; }
+h2, .text-2xl { @apply leading-snug tracking-tight; }
+h3, .text-xl { @apply leading-snug; }
+p { @apply leading-relaxed; }
+
+/* Remove default button styles for better control */
+button, [role="button"] { 
+  @apply focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900;
+}
+
+/* Smooth transitions */
+a, button, [role="button"], input, select, textarea {
+  @apply transition-all duration-200;
+}
+
+/* Fix mobile viewport issues */
+@supports (padding: max(0px)) {
+  body {
+    padding-left: max(0px, env(safe-area-inset-left));
+    padding-right: max(0px, env(safe-area-inset-right));
+  }
+}
+
+/* Prevent layout shift on scrollbar */
+html {
+  scrollbar-gutter: stable;
+}
+
+/* Responsive utility for content padding */
+@layer utilities {
+  .page-padding {
+    @apply p-4 sm:p-5 md:p-6 lg:p-8;
+  }
+  
+  .page-padding-compact {
+    @apply p-3 sm:p-4 md:p-5 lg:p-6;
+  }
+
+  .card-spacing {
+    @apply gap-4 sm:gap-5 md:gap-6 lg:gap-8;
+  }
+
+  .responsive-text {
+    @apply text-sm sm:text-base md:text-lg lg:text-xl;
+  }
+
+  .responsive-text-sm {
+    @apply text-xs sm:text-sm md:text-base;
+  }
+
+  .responsive-icon {
+    @apply text-lg sm:text-xl md:text-2xl;
+  }
+
+  .touch-target {
+    @apply p-2 sm:p-2.5 md:p-3;
+  }
+
+  .safe-area-bottom {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+
+  /* Smooth animations */
+  .animate-in-smooth {
+    animation: fadeIn 300ms ease forwards, slideFromBottom 300ms ease forwards;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideFromBottom {
+    from {
+      transform: translateY(18px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  /* Prevent horizontal scroll */
+  .no-horizontal-scroll {
+    overflow-x: hidden;
+  }
+
+  /* Better focus states */
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400;
+  }
+
+  /* Responsive container */
+  .responsive-container {
+    @apply w-full max-w-full overflow-hidden;
+  }
 }
