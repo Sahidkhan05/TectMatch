@@ -1,16 +1,8 @@
 export async function matchResumeWithJD(jdText, resumeText) {
-  const cleanJD = jdText?.trim().slice(0, 2000) || "";
-  const cleanResume = resumeText?.trim().slice(0, 3000) || "";
+  const cleanJD = jdText?.trim().slice(0, 1500) || "";      // 2000 → 1500
+  const cleanResume = resumeText?.trim().slice(0, 2000) || ""; // 3000 → 2000
 
-  const prompt = `You are an expert ATS engine and HR analyst.
-Match the resume with the job description semantically.
-
-Rules:
-- Semantic matching not just keywords
-- Normalize skills: React.js=React, Node.js=Node.js, Github=Git
-- Handle tech and non-tech domains
-- Extract implied skills from context
-- Scoring: 80-100 Highly Suitable, 50-79 Moderate Fit, 0-49 Low Fit
+  const prompt = `You are an ATS engine. Analyze the resume against the job description and return ONLY a JSON object.
 
 Job Description:
 """
@@ -22,7 +14,7 @@ Resume:
 ${cleanResume}
 """
 
-Return ONLY this JSON, no extra text, no markdown, no explanation:
+Return ONLY this JSON object, no thinking, no explanation, no markdown:
 {
   "candidate_name": "",
   "applied_role": "",
@@ -55,15 +47,15 @@ Return ONLY this JSON, no extra text, no markdown, no explanation:
           Authorization: `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          model: "llama3.1-8b",
+          model: "gpt-oss-120b",
           messages: [
             {
               role: "user",
               content: prompt,
             },
           ],
-          temperature: 0.2,
-          max_tokens: 1000,
+          temperature: 0,             // 0.2 → 0
+          max_tokens: 2000,
         }),
       }
     );
@@ -81,8 +73,7 @@ Return ONLY this JSON, no extra text, no markdown, no explanation:
       );
     }
 
-    const rawText =
-      data?.choices?.[0]?.message?.content;
+    const rawText = data?.choices?.[0]?.message?.content;
 
     if (!rawText) {
       throw new Error("Empty AI response");
@@ -96,7 +87,9 @@ Return ONLY this JSON, no extra text, no markdown, no explanation:
         .replace(/```/g, "")
         .trim();
 
-      result = JSON.parse(cleaned);
+      const jsonMatch = cleaned.match(/\{[\s\S]*\}/);       // JSON extract karo
+      if (!jsonMatch) throw new Error("No JSON found");
+      result = JSON.parse(jsonMatch[0]);
 
     } catch {
       throw new Error("Invalid JSON from AI");
