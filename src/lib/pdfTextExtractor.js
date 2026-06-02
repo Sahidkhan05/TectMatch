@@ -1,82 +1,60 @@
-import { createRequire } from 'module';
-import { pathToFileURL } from 'url';
+const MAX_EXTRACTED_TEXT_LENGTH = 100_000;
 
-const MAX_EXTRACTED_TEXT_LENGTH = 5000;
-
-const require = createRequire(import.meta.url);
-
-class FallbackDOMMatrix {
-  constructor(init) {
-    const values = Array.isArray(init) ? init : [];
-    this.a = values[0] ?? 1;
-    this.b = values[1] ?? 0;
-    this.c = values[2] ?? 0;
-    this.d = values[3] ?? 1;
-    this.e = values[4] ?? 0;
-    this.f = values[5] ?? 0;
-  }
-
-  multiply() {
-    return this;
-  }
-
-  translateSelf() {
-    return this;
-  }
-
-  scaleSelf() {
-    return this;
-  }
-}
+let pdfJsNodeGlobalsReady;
 
 async function ensurePdfJsNodeGlobals() {
-  if (
-    typeof globalThis.DOMMatrix !== 'undefined' &&
-    typeof globalThis.ImageData !== 'undefined' &&
-    typeof globalThis.Path2D !== 'undefined'
-  ) {
-    return;
+  if (pdfJsNodeGlobalsReady) {
+    return pdfJsNodeGlobalsReady;
   }
 
-  try {
+  pdfJsNodeGlobalsReady = (async () => {
     const canvas = await import('@napi-rs/canvas');
 
-    globalThis.DOMMatrix ??= canvas.DOMMatrix;
-    globalThis.ImageData ??= canvas.ImageData;
-    globalThis.Path2D ??= canvas.Path2D;
-  } catch {
-    globalThis.DOMMatrix ??= FallbackDOMMatrix;
-    globalThis.ImageData ??= class ImageData {};
-    globalThis.Path2D ??= class Path2D {};
-  }
+    const globals = {
+      DOMMatrix: canvas.DOMMatrix,
+      DOMPoint: canvas.DOMPoint,
+      DOMRect: canvas.DOMRect,
+      ImageData: canvas.ImageData,
+      Path2D: canvas.Path2D,
+    };
+
+    for (const [name, value] of Object.entries(globals)) {
+      if (typeof globalThis[name] === 'undefined' && value) {
+        globalThis[name] = value;
+      }
+    }
+  })();
+
+  return pdfJsNodeGlobalsReady;
 }
 
 function normalizeTextItems(items) {
   return items
-    .map((item) => item.str)
-    .filter(Boolean)
+    .map((item) => ('str' in item ? item.str : ''))
     .join(' ')
-    .replace(/[ \t]+/g, ' ')
+    .replace(/\s+/g, ' ')
     .trim();
 }
 
 export async function extractPdfText(buffer) {
+  if (!buffer || buffer.length === 0) {
+    return '';
+  }
+
   await ensurePdfJsNodeGlobals();
 
   const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs');
 
-  pdfjsLib.GlobalWorkerOptions.workerSrc = '';
-  
   const loadingTask = pdfjsLib.getDocument({
-  data: new Uint8Array(buffer),
-  disableWorker: true,
-  disableFontFace: true,
-  isEvalSupported: false,
-  isImageDecoderSupported: false,
-  isOffscreenCanvasSupported: false,
-  useSystemFonts: true,
-  useWorkerFetch: false,
-});
+    data: new Uint8Array(buffer),
+    disableWorker: true,
+    disableFontFace: true,
+    isEvalSupported: false,
+    isImageDecoderSupported: false,
+    isOffscreenCanvasSupported: false,
+    useSystemFonts: true,
+    useWorkerFetch: false,
+  });
 
   const pdf = await loadingTask.promise;
   const pages = [];
@@ -84,15 +62,19 @@ export async function extractPdfText(buffer) {
   try {
     for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
       const page = await pdf.getPage(pageNumber);
+
       const content = await page.getTextContent({
         disableCombineTextItems: false,
         includeMarkedContent: false,
       });
 
       const pageText = normalizeTextItems(content.items);
+
       if (pageText) {
         pages.push(pageText);
       }
+
+      page.cleanup();
     }
   } finally {
     await pdf.destroy();
