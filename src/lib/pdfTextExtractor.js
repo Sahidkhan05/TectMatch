@@ -65,19 +65,18 @@ export async function extractPdfText(buffer) {
 
   const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs');
 
-  pdfjsLib.GlobalWorkerOptions.workerSrc = pathToFileURL(
-    require.resolve('pdfjs-dist/legacy/build/pdf.worker.mjs')
-  ).href;
+  
 
   const loadingTask = pdfjsLib.getDocument({
-    data: new Uint8Array(buffer),
-    disableFontFace: true,
-    isEvalSupported: false,
-    isImageDecoderSupported: false,
-    isOffscreenCanvasSupported: false,
-    useSystemFonts: true,
-    useWorkerFetch: false,
-  });
+  data: new Uint8Array(buffer),
+  disableWorker: true,
+  disableFontFace: true,
+  isEvalSupported: false,
+  isImageDecoderSupported: false,
+  isOffscreenCanvasSupported: false,
+  useSystemFonts: true,
+  useWorkerFetch: false,
+});
 
   const pdf = await loadingTask.promise;
   const pages = [];
